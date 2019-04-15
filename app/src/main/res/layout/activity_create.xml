@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CreateActivity"
+    android:orientation="vertical"
+    >
+
+    <TextView
+        android:id="@+id/welcome_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorAccent"
+        android:text="Create New Activity"
+        android:textSize="16sp"
+        android:layout_marginLeft="20dp"
+        android:elevation="15dp"
+        android:layout_centerInParent="true"
+        android:layout_alignParentLeft="true"
+        android:textStyle="bold"
+        android:layout_marginTop="30dp"
+        />
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="10dp"
+        android:layout_margin="20dp"
+        >
+
+        <com.balysv.materialripple.MaterialRippleLayout
+            android:id="@+id/select_location_mrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/RippleStyleWhite"
+            >
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorAccent"
+                android:text="select location"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                />
+
+        </com.balysv.materialripple.MaterialRippleLayout>
+
+    </android.support.v7.widget.CardView>
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        />
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="10dp"
+        android:layout_margin="20dp"
+        >
+
+        <com.balysv.materialripple.MaterialRippleLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/RippleStyleWhite"
+            >
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorAccent"
+                android:text="create activity"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                />
+
+        </com.balysv.materialripple.MaterialRippleLayout>
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>
