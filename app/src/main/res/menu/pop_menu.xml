@@ -7,7 +7,7 @@
         />
 
     <item
-        android:title="My Activities"
+        android:title="Activities"
         android:id="@+id/my_activity"
         />
 

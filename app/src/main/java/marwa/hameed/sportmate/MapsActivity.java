@@ -73,7 +73,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     EditText time_field,date_field;
     String type,time,date,name,imageurl;
 
-
     LatLng latLng_from,latLng_to;
     int i = 0;
 
@@ -165,24 +164,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .add(
                                 new LatLng(latLng_from.latitude, latLng_from.longitude),
                                 new LatLng(latLng_to.latitude, latLng_to.longitude)));
-
-                /*List<LatLng> listLocsToDraw = new ArrayList<>();
-
-                listLocsToDraw.add(latLng_from);
-                listLocsToDraw.add(latLng_to);
-
-                PolylineOptions options = new PolylineOptions();
-
-                options.color( Color.parseColor( "#CC0000FF" ) );
-                options.width( 5 );
-                options.visible( true );
-
-                for (LatLng locRecorded : listLocsToDraw )
-                {
-                    options.add( new LatLng(locRecorded.latitude, locRecorded.longitude));
-                }
-
-                mMap.addPolyline(options);*/
             }
         });
 
@@ -257,34 +238,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = new Intent(getApplicationContext(), StartActivity.class);
         startActivity(intent);
     }
-
-    /*private void createActivity(String s, String name, String imageurl, String type, String time, String date, double longitude, double latitude, double latitude1, double longitude1)
-    {
-        ActivityModel activityModel = new ActivityModel(s,name,imageurl,type,time,date,longitude,latitude,latitude1,longitude1);
-
-        String key = databaseReference.child("Activites").push().getKey();
-        databaseReference.child("Activites").child(key).setValue(activityModel);
-        databaseReference.child("UsersActivities").child(getUID()).child(key).setValue(activityModel);
-
-        if (lastlocation != null && key != null)
-        {
-            DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("ActivitiesLocations");
-
-            GeoFire geoFire = new GeoFire(reference);
-            geoFire.setLocation(key, new GeoLocation(lastlocation.getLatitude(), lastlocation.getLongitude()), new GeoFire.CompletionListener()
-            {
-                @Override
-                public void onComplete(String key, DatabaseError error)
-                {
-
-                }
-            });
-        }
-
-        Toast.makeText(getApplicationContext(), "Activity Created ..", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(getApplicationContext(), StartActivity.class);
-        startActivity(intent);
-    }*/
 
     public static BigDecimal round(float d, int decimalPlace)
     {
@@ -378,6 +331,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 100);
             return;
         }
+
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
     }
 
@@ -433,7 +387,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void onCancelled(DatabaseError databaseError)
                     {
-                        Toast.makeText(getApplicationContext(), "can\'t fetch data", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }

@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -36,6 +37,7 @@ import com.victor.loading.rotate.RotateLoading;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import marwa.hameed.sportmate.Model.ActivityModel;
+import marwa.hameed.sportmate.Model.JoinModel;
 import marwa.hameed.sportmate.Model.UserModel;
 
 public class StartActivity extends AppCompatActivity
@@ -52,6 +54,8 @@ public class StartActivity extends AppCompatActivity
     FirebaseRecyclerAdapter<ActivityModel, ActivityViewHolder> firebaseRecyclerAdapter;
 
     RotateLoading rotateLoading;
+
+    String name,imageurl;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -150,8 +154,11 @@ public class StartActivity extends AppCompatActivity
                         // Get user value
                         UserModel userModel = dataSnapshot.getValue(UserModel.class);
 
+                        name = userModel.getName();
+                        imageurl = userModel.getImageurl();
+
                         Picasso.get()
-                                .load(userModel.getImageurl())
+                                .load(imageurl)
                                 .placeholder(R.drawable.addphoto)
                                 .error(R.drawable.addphoto)
                                 .into(circleImageView);
@@ -194,6 +201,19 @@ public class StartActivity extends AppCompatActivity
 
                 final String key = getRef(position).getKey();
 
+                holder.join.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        JoinModel joinModel = new JoinModel(name,imageurl);
+
+                        databaseReference.child("JoinedActivities").child(key).child(getUID()).setValue(joinModel);
+                        databaseReference.child("MineActivities").child(getUID()).child(key).setValue(model);
+                        Toast.makeText(getApplicationContext(), "Joined ..", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
                 holder.BindPlaces(model);
             }
 
@@ -214,6 +234,7 @@ public class StartActivity extends AppCompatActivity
         CircleImageView imageView;
         TextView name,type,date,time;
         MaterialRippleLayout details;
+        Button join;
 
         ActivityViewHolder(View itemView)
         {
@@ -225,6 +246,7 @@ public class StartActivity extends AppCompatActivity
             date = itemView.findViewById(R.id.date_txt);
             time = itemView.findViewById(R.id.time_txt);
             details = itemView.findViewById(R.id.details);
+            join = itemView.findViewById(R.id.join_btn);
         }
 
         void BindPlaces(final ActivityModel activityModel)

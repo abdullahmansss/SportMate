@@ -69,8 +69,8 @@ public class NearestActivity extends AppCompatActivity implements GoogleApiClien
     GeoFire geoFire;
     GeoQuery geoQuery;
     int raduis = 1;
-    Boolean driverfound = false;
-    String driverfoundID;
+    Boolean activityfound = false;
+    String activityfoundID;
     int i = 0;
 
     CircleImageView imageView;
@@ -113,7 +113,7 @@ public class NearestActivity extends AppCompatActivity implements GoogleApiClien
         });
     }
 
-    private void getClosestDriver(final Location location)
+    private void getClosestActivity(final Location location)
     {
         databaseReference = FirebaseDatabase.getInstance().getReference().child("ActivitiesLocations");
 
@@ -127,15 +127,15 @@ public class NearestActivity extends AppCompatActivity implements GoogleApiClien
             @Override
             public void onKeyEntered(String key, GeoLocation location)
             {
-                if (!driverfound || i ==0)
+                if (i ==0)
                 {
-                    driverfound = true;
-                    driverfoundID = key;
+                    activityfound = true;
+                    activityfoundID = key;
                     Toast.makeText(getApplicationContext(), "Found ...", Toast.LENGTH_SHORT).show();
 
                     DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
 
-                    reference.child("Activites").child(driverfoundID).addListenerForSingleValueEvent(
+                    reference.child("Activites").child(activityfoundID).addListenerForSingleValueEvent(
                             new ValueEventListener()
                             {
                                 @Override
@@ -167,9 +167,8 @@ public class NearestActivity extends AppCompatActivity implements GoogleApiClien
                                     rotateLoading.stop();
                                 }
                             });
-
                     rotateLoading.stop();
-                    i =0;
+                    i = 0;
                 }
             }
 
@@ -188,7 +187,7 @@ public class NearestActivity extends AppCompatActivity implements GoogleApiClien
             @Override
             public void onGeoQueryReady()
             {
-                if (!driverfound)
+                if (!activityfound)
                 {
                     if (raduis >= 8)
                     {
@@ -199,7 +198,7 @@ public class NearestActivity extends AppCompatActivity implements GoogleApiClien
                     } else
                     {
                         raduis = raduis + 1;
-                        getClosestDriver(location);
+                        getClosestActivity(location);
                     }
                 }
             }
@@ -221,7 +220,7 @@ public class NearestActivity extends AppCompatActivity implements GoogleApiClien
 
         rotateLoading.start();
 
-        getClosestDriver(lastlocation);
+        getClosestActivity(lastlocation);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
