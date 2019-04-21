@@ -12,11 +12,19 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.balysv.materialripple.MaterialRippleLayout;
+import com.firebase.geofire.GeoFire;
+import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -28,14 +36,28 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import marwa.hameed.sportmate.Model.ActivityModel;
+import marwa.hameed.sportmate.Model.UserModel;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback , GoogleApiClient.ConnectionCallbacks
         , GoogleApiClient.OnConnectionFailedListener, LocationListener
@@ -46,10 +68,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Location lastlocation;
     LocationRequest locationRequest;
 
-    MaterialRippleLayout get_my_location_mrl,estimate_distance_mrl;
+    Button get_my_location_mrl,estimate_distance_mrl,create_activity;
+    Spinner type_spinner;
+    EditText time_field,date_field;
+    String type,time,date,name,imageurl;
+
 
     LatLng latLng_from,latLng_to;
     int i = 0;
+
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference databaseReference;
+
+    BigDecimal result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -61,8 +92,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        returndata();
+
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference();
+        databaseReference.keepSynced(true);
+
         get_my_location_mrl  =findViewById(R.id.get_my_location_mrl);
         estimate_distance_mrl = findViewById(R.id.estimate_distance_mrl);
+        create_activity = findViewById(R.id.create_activity_btn);
+        type_spinner = findViewById(R.id.type_spinner);
+        time_field = findViewById(R.id.time_field);
+        date_field = findViewById(R.id.date_field);
+
+        ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(getApplicationContext(),
+                R.array.activities, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        type_spinner.setAdapter(adapter1);
+
+        type_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
+                type = String.valueOf(parent.getItemAtPosition(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent)
+            {
+
+            }
+        });
 
         get_my_location_mrl.setOnClickListener(new View.OnClickListener()
         {
@@ -89,12 +151,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Location.distanceBetween(latLng_from.latitude, latLng_from.longitude,
                         latLng_to.latitude, latLng_to.longitude, results);
 
-                float s = results[0] * 1.8f;
+                float s = (results[0] * 1.8f) / 1000;
                 String distance = String.valueOf(s);
 
-                Toast.makeText(getApplicationContext(), distance, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(), distance, Toast.LENGTH_SHORT).show();
 
-                List<LatLng> listLocsToDraw = new ArrayList<>();
+                result = round(s,2);
+
+                estimate_distance_mrl.setText(result + " K.M");
+
+                Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
+                        .clickable(true)
+                        .add(
+                                new LatLng(latLng_from.latitude, latLng_from.longitude),
+                                new LatLng(latLng_to.latitude, latLng_to.longitude)));
+
+                /*List<LatLng> listLocsToDraw = new ArrayList<>();
 
                 listLocsToDraw.add(latLng_from);
                 listLocsToDraw.add(latLng_to);
@@ -110,9 +182,115 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     options.add( new LatLng(locRecorded.latitude, locRecorded.longitude));
                 }
 
-                mMap.addPolyline(options);
+                mMap.addPolyline(options);*/
             }
         });
+
+        create_activity.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                time = time_field.getText().toString();
+                date = date_field.getText().toString();
+
+                if (latLng_to == null)
+                {
+                    Toast.makeText(getApplicationContext(), "please choose activity location", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (result == null)
+                {
+                    Toast.makeText(getApplicationContext(), "please estimate activity distance", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (type.equals("Select Activity Type"))
+                {
+                    Toast.makeText(getApplicationContext(), "please choose activity type", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (TextUtils.isEmpty(time))
+                {
+                    Toast.makeText(getApplicationContext(), "please choose activity time", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (TextUtils.isEmpty(date))
+                {
+                    Toast.makeText(getApplicationContext(), "please choose activity date", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                //private String distance,name,imageurl,type,time,date;
+                //private double latitude_from,longitude_from,latitude_to,longitude_to;
+                createActivity(result + "",name,imageurl,type,time,date,latLng_from.latitude,latLng_from.longitude,latLng_to.latitude,latLng_to.longitude);
+            }
+        });
+    }
+
+    private void createActivity(String s, String name, String imageurl, String type, String time, String date, double latitude, double longitude, double latitude1, double longitude1)
+    {
+        ActivityModel activityModel = new ActivityModel(s,name,imageurl,type,time,date,latitude,longitude,latitude1,longitude1);
+
+        String key = databaseReference.child("Activites").push().getKey();
+        databaseReference.child("Activites").child(key).setValue(activityModel);
+        databaseReference.child("UsersActivities").child(getUID()).child(key).setValue(activityModel);
+
+        if (lastlocation != null && key != null)
+        {
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("ActivitiesLocations");
+
+            GeoFire geoFire = new GeoFire(reference);
+            geoFire.setLocation(key, new GeoLocation(latitude, longitude), new GeoFire.CompletionListener()
+            {
+                @Override
+                public void onComplete(String key, DatabaseError error)
+                {
+
+                }
+            });
+        }
+
+        Toast.makeText(getApplicationContext(), "Activity Created ..", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getApplicationContext(), StartActivity.class);
+        startActivity(intent);
+    }
+
+    /*private void createActivity(String s, String name, String imageurl, String type, String time, String date, double longitude, double latitude, double latitude1, double longitude1)
+    {
+        ActivityModel activityModel = new ActivityModel(s,name,imageurl,type,time,date,longitude,latitude,latitude1,longitude1);
+
+        String key = databaseReference.child("Activites").push().getKey();
+        databaseReference.child("Activites").child(key).setValue(activityModel);
+        databaseReference.child("UsersActivities").child(getUID()).child(key).setValue(activityModel);
+
+        if (lastlocation != null && key != null)
+        {
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("ActivitiesLocations");
+
+            GeoFire geoFire = new GeoFire(reference);
+            geoFire.setLocation(key, new GeoLocation(lastlocation.getLatitude(), lastlocation.getLongitude()), new GeoFire.CompletionListener()
+            {
+                @Override
+                public void onComplete(String key, DatabaseError error)
+                {
+
+                }
+            });
+        }
+
+        Toast.makeText(getApplicationContext(), "Activity Created ..", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(getApplicationContext(), StartActivity.class);
+        startActivity(intent);
+    }*/
+
+    public static BigDecimal round(float d, int decimalPlace)
+    {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+        return bd;
     }
 
     public void getLocation ()
@@ -137,6 +315,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     {
         mMap = googleMap;
 
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener()
+        {
+            @Override
+            public boolean onMarkerClick(Marker marker)
+            {
+                Toast.makeText(MapsActivity.this, "" + marker.getPosition() , Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener()
         {
             @Override
@@ -146,6 +334,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 {
                     mMap.clear();
                     latLng_to = null;
+                    estimate_distance_mrl.setText("estimate");
 
                     latLng_from = latLng;
                     LatLng myposition = new LatLng(latLng_from.latitude, latLng_from.longitude);
@@ -218,5 +407,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .addApi(LocationServices.API)
                 .build();
         googleApiClient.connect();
+    }
+
+    public void returndata()
+    {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        mDatabase.keepSynced(true);
+
+        final String userId = user.getUid();
+
+        mDatabase.child("Users").child(userId).addListenerForSingleValueEvent(
+                new ValueEventListener()
+                {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        // Get user value
+                        UserModel userModel = dataSnapshot.getValue(UserModel.class);
+
+                        name = userModel.getName();
+                        imageurl = userModel.getImageurl();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError)
+                    {
+                        Toast.makeText(getApplicationContext(), "can\'t fetch data", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private String getUID()
+    {
+        String id = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        return id;
     }
 }

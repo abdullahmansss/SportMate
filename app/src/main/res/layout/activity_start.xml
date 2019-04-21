@@ -50,6 +50,29 @@
 
         </RelativeLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:listitem="@layout/activity_item"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                />
+
+            <com.victor.loading.rotate.RotateLoading
+                android:id="@+id/rotateloading"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                app:loading_width="5dp"
+                app:loading_color="@color/colorPrimary"
+                android:layout_centerInParent="true"/>
+
+        </RelativeLayout>
+
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton

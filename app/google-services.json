@@ -1,42 +1,34 @@
 {
   "project_info": {
-    "project_number": "656255651180",
-    "firebase_url": "https://sport-mate-89a1a.firebaseio.com",
-    "project_id": "sport-mate-89a1a",
-    "storage_bucket": "sport-mate-89a1a.appspot.com"
+    "project_number": "394767256774",
+    "firebase_url": "https://sportmate-a2438.firebaseio.com",
+    "project_id": "sportmate-a2438",
+    "storage_bucket": "sportmate-a2438.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:656255651180:android:e000445d056f83c3",
+        "mobilesdk_app_id": "1:394767256774:android:e000445d056f83c3",
         "android_client_info": {
           "package_name": "marwa.hameed.sportmate"
         }
       },
       "oauth_client": [
         {
-          "client_id": "656255651180-kibpkspefn8ibhsapavjapovm250tjm7.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "marwa.hameed.sportmate",
-            "certificate_hash": "23d4a38124968feb2c2089fe3280a75d57b24b95"
-          }
-        },
-        {
-          "client_id": "656255651180-lap83putl9u9csjjmaevjcqfk1t45gve.apps.googleusercontent.com",
+          "client_id": "394767256774-ffr5iftsgt3sfkfr7b97bh32hgq0sefk.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCeLi8M2x0QZeM6mTgU1M-28v-Ow4lauZ8"
+          "current_key": "AIzaSyBNtMqfLH6_lP3wU_k8-V-Xjw7nWI9XUUo"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "656255651180-lap83putl9u9csjjmaevjcqfk1t45gve.apps.googleusercontent.com",
+              "client_id": "394767256774-ffr5iftsgt3sfkfr7b97bh32hgq0sefk.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
